@@ -1,20 +1,26 @@
-# 测试Agent — 员工入职离职管理系统 依赖
+﻿# 员工入离职管理系统 - 多Agent协作框架 依赖
 #
-# Python 版本要求: >=3.10, <3.14 (crewai 不支持 3.14+)
+# Python版本要求: >=3.10, <3.14 (crewai不支持3.14+)
 #
 # 快速安装:
 #   pip install -r requirements.txt
 
-# ── 核心框架 ──
-crewai>=0.85.0                # AI Agent 框架（推荐 >=0.85.0，支持 Python 3.10-3.13）
-openai>=1.7.1                 # crewai 内部使用
+# --- 核心框架 ---
+crewai>=0.85.0                # AI Agent框架
+openai>=1.7.1                 # CrewAI内部使用
 
-# ── LLM ──
-requests>=2.28.0              # DashScope API 调用（阿里云通义千问）
-pyyaml>=6.0                   # YAML 解析（Skill frontmatter、load_skills.yaml）
+# --- LLM ---
+requests>=2.28.0              # API调用
+pyyaml>=6.0                   # YAML解析
+python-dotenv>=1.0.0          # .env环境变量加载
 
-# ── 工具库 ──
-pydantic>=2.0.0               # 数据模型校验（crewai 强依赖）
+# --- 工具库 ---
+pydantic>=2.0.0               # 数据模型校验(CrewAI强依赖)
+crewai-tools>=0.1.0           # CrewAI工具库(FileReadTool, FileWriterTool等)
 
-# ── 测试 ──
+# --- 测试 ---
 pytest>=7.0.0                 # 测试框架
+
+# --- 文档与数据 ---
+openpyxl>=3.0.0               # Excel文件读取
+markdown>=3.0.0               # Markdown处理

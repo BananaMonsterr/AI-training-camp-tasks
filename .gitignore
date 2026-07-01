@@ -1,55 +1,46 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+*.pyo
 *.egg-info/
-.installed.cfg
+dist/
+build/
 *.egg
-
-# Virtual Environment
+.venv/
 venv/
-env/
-ENV/
-.venv
+
+# Environment
+.env
+*.key
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
 .DS_Store
+Thumbs.db
 
-# 环境变量和敏感信息
-.env
-.env.local
-.env.*.local
-*.key
-*.pem
-*.secret
+# macOS
+__MACOSX/
 
-# 测试
-.pytest_cache/
-__pycache__/
-.coverage
-htmlcov/
+# Session data
+workspace/**/sessions/
+workspace/mailboxes/*.json
 
-# 临时文件
-*.tmp
-*.bak
+# Output files (keep dirs, ignore generated files)
+workspace/docs/*.md
+workspace/code/**/*
+!workspace/code/.gitkeep
+!workspace/docs/.gitkeep
+!workspace/mailboxes/.gitkeep
+workspace/qa/sessions/
+
+# Generated outputs
+outputs/**/*.md
+!outputs/.gitkeep
+
+# Cache
 *.cache
-sessions/
+.myagent1_llm_cache.json
