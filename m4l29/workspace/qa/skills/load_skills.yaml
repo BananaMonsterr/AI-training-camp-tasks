@@ -1,0 +1,31 @@
+# QA workspace 专属 Skills 清单
+# 数字员工的能力完全由 Workspace 决定（v3 架构原则）
+
+skills:
+  - name: mailbox
+    type: task
+    enabled: true
+
+  - name: test_design
+    type: reference
+    enabled: true
+
+  - name: test_executor
+    type: task
+    enabled: true
+
+  - name: defect_tracker
+    type: task
+    enabled: true
+
+  - name: report_generator
+    type: task
+    enabled: true
+
+  - name: memory-save
+    type: task
+    enabled: true
+
+  - name: write-output
+    type: task
+    enabled: true
