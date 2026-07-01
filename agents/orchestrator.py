@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""编排器（Orchestrator）- 多Agent流水线调度"""
-
+"""编排器(Orchestrator) - 多Agent流水线调度 + 产出链式传递"""
 from __future__ import annotations
-import sys
+import json, os, sys
+from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(_PROJECT_ROOT) not in sys.path:
@@ -42,10 +41,22 @@ PIPELINE_STAGES = [
      "outputs": "缺陷清单、功能测试报告、验收测试报告、验收结论"},
 ]
 
+
 class Orchestrator:
+    "编排器 - 链式流水线调度 + 产出记录"
+
     def __init__(self, workspace_dir=None):
         self.workspace_dir = Path(workspace_dir) if workspace_dir else _PROJECT_ROOT / "workspace"
+        self.docs_dir = self.workspace_dir / "docs"
+        self.docs_dir.mkdir(parents=True, exist_ok=True)
         self.results = {}
+        self.stage_outputs = {}
+        self.manifest = {
+            "pipeline_name": "员工入离职管理系统 - 多Agent协作流水线",
+            "start_time": datetime.now().isoformat(),
+            "stages": [],
+            "agents": {},
+        }
         self._agent_registry = {
             "requirement_analyst": (requirement_analyst.build_agent, requirement_analyst.build_tasks),
             "business_designer": (business_designer.build_agent, business_designer.build_tasks),
@@ -58,55 +69,111 @@ class Orchestrator:
             "acceptance_tester": (acceptance_tester.build_agent, acceptance_tester.build_tasks),
         }
 
+    def _get_upstream_context(self, current_stage_idx):
+        parts = []
+        for i in range(current_stage_idx):
+            sname = PIPELINE_STAGES[i]["name"]
+            if sname in self.stage_outputs:
+                outputs = self.stage_outputs[sname]
+                parts.append("【%s】产出文件:" % sname)
+                for role_key, files in outputs.items():
+                    for f in files:
+                        parts.append("  - %s: %s" % (role_key, f))
+        return "\n".join(parts) if parts else ""
+
+    def _scan_output_files(self):
+        if not self.docs_dir.exists():
+            return []
+        files = []
+        for f in sorted(self.docs_dir.iterdir()):
+            if f.is_file() and f.suffix in (".md", ".json", ".html", ".js", ".css", ".py"):
+                if f.name.startswith(".") or f.name == "pipeline_manifest.json":
+                    continue
+                files.append(str(f.resolve()))
+        return files
+
     def run_agent(self, role_key):
         if role_key not in self._agent_registry:
-            raise KeyError("未知角色: {0}".format(role_key))
+            raise KeyError("未知角色: %s" % role_key)
         build_fn, build_tasks_fn = self._agent_registry[role_key]
         agent = build_fn()
         tasks = build_tasks_fn(agent)
-        print("\n{0}".format("="*60))
-        print("  执行 Agent: {0}".format(role_key))
-        print("{0}".format("="*60))
+        print("\n%s" % ("="*60))
+        print("  执行 Agent: %s" % role_key)
         result = run_agent([agent], tasks)
+        output_files = self._scan_output_files()
+        self.manifest["agents"][role_key] = {
+            "output_files": output_files,
+            "result_preview": result[:500] if result else "",
+        }
         self.results[role_key] = result
         return result
 
     def run_stage(self, stage_name):
-        stage = next((s for s in PIPELINE_STAGES if s["name"] == stage_name), None)
+        stage_idx, stage = None, None
+        for i, s in enumerate(PIPELINE_STAGES):
+            if s["name"] == stage_name:
+                stage_idx, stage = i, s
+                break
         if not stage:
-            raise ValueError("未知阶段: {0}".format(stage_name))
-        print("\n{0}".format("="*60))
-        print("  阶段: {0}".format(stage["name"]))
-        print("  主导角色: {0}".format(", ".join(stage["lead_roles"])))
-        print("{0}".format("="*60))
-        stage_results = {}
+            raise ValueError("未知阶段: %s" % stage_name)
+        upstream_ctx = self._get_upstream_context(stage_idx)
+        if upstream_ctx:
+            print("\n  [上游产出] 以下文件可作为本阶段输入:")
+            print(upstream_ctx)
+        print("\n%s" % ("="*60))
+        print("  阶段: %s" % stage["name"])
+        print("  主导角色: %s" % ", ".join(stage["lead_roles"]))
+        print("  输入: %s" % stage["inputs"])
+        print("  预期产出: %s" % stage["outputs"])
+        print("%s" % ("="*60))
+        stage_outputs = {}
         for role_key in stage["lead_roles"]:
-            result = self.run_agent(role_key)
-            stage_results[role_key] = result
-        print("\n  [完成] 阶段 [{0}] 执行完成".format(stage_name))
-        self.results["stage:{0}".format(stage_name)] = str(stage_results)
-        return stage_results
+            self.run_agent(role_key)
+            stage_outputs[role_key] = self._scan_output_files()
+        self.stage_outputs[stage_name] = stage_outputs
+        self.manifest["stages"].append({
+            "name": stage_name,
+            "agents": stage["lead_roles"],
+            "produced_files": [f for files in stage_outputs.values() for f in files],
+        })
+        self._save_manifest()
+        print("\n  [完成] 阶段【%s】执行完成" % stage_name)
+        print("  [产出] 文件保存到 workspace/docs/")
+        return stage_outputs
 
     def run_pipeline(self, stages=None):
         if stages is None:
             stages = [s["name"] for s in PIPELINE_STAGES]
-        print("\n{0}".format("="*60))
+        self.manifest["stages_config"] = list(stages)
+        print("\n" + "="*60)
         print("  员工入离职管理系统 - 多Agent协作流水线")
-        print("  流水线: {0}".format(" -> ".join(stages)))
-        print("{0}".format("="*60))
+        print("  流水线: %s" % " -> ".join(stages))
+        print("="*60)
         for i, stage_name in enumerate(stages, 1):
-            print("\n{0}".format("="*60))
-            print("  [{0}/{1}] {2}".format(i, len(stages), stage_name))
-            print("{0}".format("="*60))
+            print("\n" + "="*60)
+            print("  [%d/%d] %s" % (i, len(stages), stage_name))
+            print("="*60)
             self.run_stage(stage_name)
+        self.manifest["end_time"] = datetime.now().isoformat()
+        self.manifest["status"] = "completed"
+        self._save_manifest()
         return self.get_summary()
 
+    def _save_manifest(self):
+        mpath = self.docs_dir / "pipeline_manifest.json"
+        try:
+            mpath.write_text(json.dumps(self.manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception as e:
+            print("  [WARN] 保存manifest失败: %s" % e)
+
     def get_summary(self):
-        return {"completed_agents": list(self.results.keys()), "results": self.results}
+        mpath = self.docs_dir / "pipeline_manifest.json"
+        ms = str(mpath) if mpath.exists() else ""
+        return {"completed_agents": list(self.results.keys()), "manifest": ms, "docs_dir": str(self.docs_dir)}
 
 def run_pipeline(stages=None):
-    orch = Orchestrator()
-    return orch.run_pipeline(stages)
+    return Orchestrator().run_pipeline(stages)
 
 if __name__ == "__main__":
     import sys
@@ -121,5 +188,4 @@ if __name__ == "__main__":
         orch.run_stage(args[0])
     else:
         orch.run_agent(args[0])
-        print("\n结果: {0}".format(list(orch.results.keys())))
-    print("完成！")
+        print("完成！")
