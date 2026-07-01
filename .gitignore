@@ -41,18 +41,14 @@ ENV/
 *.key
 *.pem
 *.secret
-CLAUDE.md
 
-# 测试覆盖率
+# 测试
+.pytest_cache/
 .coverage
 htmlcov/
-.pytest_cache/
-.tox/
 
 # 临时文件
 *.tmp
 *.bak
 *.cache
-
-# 项目特定
-*.md.bak
+sessions/

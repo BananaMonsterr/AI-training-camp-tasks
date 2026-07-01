@@ -1,1 +1,0 @@
-/Users/xiao/Documents/python/crewai_mas_demo/m4l23/workspace/design/architecture.md

@@ -33,7 +33,7 @@ for _p in [str(_SHARED_DIR), str(_PROJECT_ROOT)]:
 from llm import aliyun_llm  # noqa: E402
 from tools.skill_loader_tool import SkillLoaderTool  # noqa: E402
 
-from m3l20.m3l20_file_memory import (  # noqa: E402
+from tools.m3l20_file_memory import (  # noqa: E402
     build_bootstrap_prompt,
     load_session_ctx,
     save_session_ctx,
