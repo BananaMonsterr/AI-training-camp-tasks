@@ -28,7 +28,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import requests
 from crewai import BaseLLM
@@ -57,7 +57,7 @@ logger = _get_logger()
 class AliyunLLM(BaseLLM):
     """阿里云通义千问 LLM 实现类，支持重试与异步调用。"""
 
-    ENDPOINTS = {
+    ENDPOINTS: ClassVar[dict[str, str]] = {
         "cn": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
         "intl": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
         "finance": "https://dashscope-finance.aliyuncs.com/compatible-mode/v1/chat/completions",
