@@ -1,0 +1,59 @@
+workspace/code/
+├── __init__.py
+├── main.py                          # FastAPI 应用入口
+├── requirements.txt                 # 项目依赖
+├── file_structure.txt               # 本文件
+├── utils/
+│   ├── __init__.py
+│   ├── exceptions.py                # 自定义异常体系（22个错误码）
+│   ├── response.py                  # 统一响应格式
+│   └── sensitive.py                 # 敏感字段脱敏工具
+├── models/
+│   ├── __init__.py
+│   ├── base.py                      # 基础模型（UUID, TimestampMixin）
+│   ├── employee.py                  # 员工模型（5种状态, 4种雇佣类型）
+│   ├── onboarding.py                # 入职申请模型（7种状态）
+│   ├── offboarding.py               # 离职申请模型（8种状态, 4种离职类型）
+│   ├── approval.py                  # 审批流模板+审批记录模型
+│   ├── notification.py              # 通知模型（7种通知类型, 3种渠道）
+│   └── auth.py                      # 用户/角色/用户-角色关联模型
+├── engines/
+│   ├── __init__.py
+│   ├── state_machine.py             # 状态机引擎核心（StateMachine, StateMachineEngine）
+│   ├── onboarding_sm.py             # 入职状态机（12条转移规则）
+│   └── offboarding_sm.py            # 离职状态机（13条转移规则）
+├── services/
+│   ├── __init__.py
+│   ├── employee_service.py          # 员工管理服务（CRUD+部门查询）
+│   ├── onboarding_service.py        # 入职申请服务（状态机驱动）
+│   ├── offboarding_service.py       # 离职申请服务（状态机驱动）
+│   ├── approval_service.py          # 审批流服务（模板管理+审批操作+待办+历史）
+│   └── notification_service.py      # 通知管理服务
+├── auth/
+│   ├── __init__.py
+│   ├── jwt_handler.py               # JWT令牌处理器
+│   └── rbac.py                      # 基于角色的访问控制（5种角色权限矩阵）
+├── integrations/
+│   ├── __init__.py
+│   └── hr_system.py                 # HR系统对接（模拟同步/回写/日志）
+├── notifications/
+│   ├── __init__.py
+│   ├── email_provider.py            # 邮件发送（模拟）
+│   └── notification_manager.py      # 通知管理器（站内通知+邮件）
+└── tests/
+    ├── __init__.py
+    ├── conftest.py                   # pytest fixtures
+    ├── test_models.py                # 数据模型测试（7个测试类）
+    ├── test_state_machine.py         # 状态机引擎测试（5个测试类）
+    ├── test_employee_service.py      # 员工服务测试（7个测试类）
+    ├── test_onboarding_service.py    # 入职服务测试（7个测试类）
+    ├── test_offboarding_service.py   # 离职服务测试（5个测试类）
+    ├── test_approval_service.py      # 审批服务测试（5个测试类）
+    ├── test_notification_manager.py  # 通知测试（4个测试类）
+    ├── test_rbac.py                  # 权限测试（4个测试类）
+    ├── test_hr_integration.py        # HR集成测试（5个测试类）
+    ├── test_jwt_handler.py           # JWT测试（1个测试类）
+    ├── test_sensitive.py             # 脱敏工具测试（5个测试类）
+    └── test_exceptions.py            # 异常测试（3个测试类）
+
+总计：36+ 个源文件，覆盖了API设计文档35个接口的全部后端逻辑

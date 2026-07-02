@@ -29,10 +29,12 @@ __MACOSX/
 workspace/**/sessions/
 workspace/mailboxes/*.json
 
-# Output files (keep dirs, ignore generated files)
-workspace/docs/*.md
-workspace/code/**/*
-!workspace/code/.gitkeep
+# Output files (keep dirs, ignore generated files in timestamp subdirs)
+workspace/docs/**/*.md
+workspace/docs/**/*.json
+!workspace/docs/.gitkeep
+# workspace/code/**/*  (tracked - remove ignore to allow commit)
+# !workspace/code/.gitkeep
 !workspace/docs/.gitkeep
 !workspace/mailboxes/.gitkeep
 workspace/qa/sessions/
